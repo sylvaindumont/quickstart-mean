@@ -7,7 +7,3 @@ before_script:
 
 script:
   - ~/packer/packer push -name weboaks/mean mean.json
-
-cache:
-  directories:
-    - packer
