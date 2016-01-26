@@ -1,0 +1,127 @@
+{
+  "variables": {
+    "debian_version": "8.3.0",
+    "atlas_box_version": "0.0.13",
+    "atkas_token": "{{ env `ATLAS_TOKEN` }}",
+    "docker_login_email": "{{ env `DOCKER_LOGIN_EMAIL` }}",
+    "docker_login_password": "{{ env `DOCKER_LOGIN_PASSWORD` }}",
+    "docker_login_username": "{{ env `DOCKER_LOGIN_USERNAME` }}"
+  },
+  "builders": [
+    {
+      "type": "docker",
+      "image": "buildpack-deps:jessie",
+      "run_command":  ["-d", "-i", "-t", "{{.Image}}", "/bin/bash", "-c", "/usr/bin/mongod & /usr/sbin/sshd -D -o UseDNS=no -o UsePAM=no & /bin/bash"],
+      "commit": "true"
+    },
+    {
+      "type": "virtualbox-iso",
+      "boot_command": [
+        "<esc><wait>",
+        "install <wait>",
+        "preseed/url=http://{{ .HTTPIP }}:{{ .HTTPPort }}/preseed_jessie.cfg <wait>",
+        "debian-installer=en_US <wait>",
+        "auto <wait>",
+        "locale=en_US <wait>",
+        "kbd-chooser/method=us <wait>",
+        "keyboard-configuration/xkb-keymap=us <wait>",
+        "netcfg/get_hostname={{ .Name }} <wait>",
+        "netcfg/get_domain=vagrantup.com <wait>",
+        "fb=false <wait>",
+        "debconf/frontend=noninteractive <wait>",
+        "console-setup/ask_detect=false <wait>",
+        "console-keymaps-at/keymap=us <wait>",
+        "<enter><wait>"
+      ],
+      "boot_wait": "10s",
+      "disk_size": 32768,
+      "guest_os_type": "Debian_64",
+      "headless": true,
+      "http_directory": "http",
+      "iso_checksum_type": "none",
+      "iso_url": "http://cdimage.debian.org/cdimage/release/{{user `debian_version`}}/amd64/iso-cd/debian-{{user `debian_version`}}-amd64-netinst.iso",
+      "iso_checksum": "762eb3dfc22f85faf659001ebf270b4f",
+      "iso_checksum_type": "md5",
+      "ssh_username": "vagrant",
+      "ssh_password": "vagrant",
+      "ssh_port": 22,
+      "ssh_wait_timeout": "10000s",
+      "shutdown_command": "echo 'vagrant'|sudo -S /sbin/shutdown -hP now",
+      "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
+      "virtualbox_version_file": ".vbox_version",
+      "vm_name": "debian-{{user `debian_version`}}-amd64"
+    }
+  ],
+  "post-processors": [
+    [
+      {
+        "type": "vagrant",
+        "compression_level": "9",
+        "only": ["virtualbox-iso"]
+      },
+      {
+        "type": "atlas",
+        "artifact": "weboaks/mean",
+        "artifact_type": "vagrant.box",
+        "metadata": {
+          "provider": "virtualbox",
+          "version": "{{user `atlas_box_version`}}"
+        },
+        "token": "{{user `atlas_token`}}",
+        "only": ["virtualbox-iso"]
+      }
+    ],
+    [
+      {
+        "type": "docker-tag",
+        "repository": "weboaks/mean",
+        "tag": "latest",
+        "force": true,
+        "only": ["docker"]
+      },
+      {
+        "type": "docker-push",
+        "login": "true",
+        "login_email": "{{user `docker_login_email`}}",
+        "login_username": "{{user `docker_login_username`}}",
+        "login_password": "{{user `docker_login_password`}}",
+        "only": ["docker"]
+      }
+    ]
+  ],
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "scripts": [
+        "scripts/update.sh",
+        "scripts/sshd.sh",
+        "scripts/sudoers.sh",
+        "scripts/vagrant.sh",
+        "scripts/vbaddguest.sh"
+      ],
+      "only": ["virtualbox-iso"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/vagrant-docker.sh"
+      ],
+      "only": ["docker"]
+    },
+    {
+      "type": "shell",
+      "scripts": [
+        "scripts/mean.sh"
+      ]
+    },
+    {
+      "type": "shell",
+      "execute_command": "echo 'vagrant' | {{.Vars}} sudo -E -S bash '{{.Path}}'",
+      "scripts": [
+        "scripts/cleanup.sh"
+      ],
+      "only": ["virtualbox-iso"]
+    }
+  ]
+}

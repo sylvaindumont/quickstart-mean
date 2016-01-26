@@ -1,0 +1,4 @@
+Build on atlas:
+  script:
+  - export ATLAS_TOKEN="FkYKwkEGmb1N8w.atlasv1.ZrA8c7SxjG3drwhHwuQcryLSuYRP54yk2ec4hgAkUt1xyBkpVdhDai1FfYYqvf7pnV8"
+  - packer push -name weboaks/mean debian-jessie

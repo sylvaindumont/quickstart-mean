@@ -1,0 +1,16 @@
+language: generic
+sudo: false
+
+env:
+  - PATH=$PATH:~/packer/
+
+before_script:
+  - wget https://releases.hashicorp.com/packer/0.8.6/packer_0.8.6_linux_amd64.zip
+  - unzip packer_0.8.6_linux_amd64.zip -d packer/
+
+script:
+  - packer push -name weboaks/mean mean.json
+
+cache:
+  directories:
+    - packer
