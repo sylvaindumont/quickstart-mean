@@ -6,4 +6,4 @@ before_script:
   - unzip packer_0.8.6_linux_amd64.zip -d packer/
 
 script:
-  - ~/packer/packer push -name weboaks/mean mean.json
+  - ./packer/packer push -name weboaks/mean mean.json
