@@ -98,7 +98,8 @@
         "scripts/sshd.sh",
         "scripts/sudoers.sh",
         "scripts/vagrant.sh",
-        "scripts/vbaddguest.sh"
+        "scripts/vbaddguest.sh",
+        "scripts/buildpack-deps.sh"
       ],
       "only": ["virtualbox-iso"]
     },
