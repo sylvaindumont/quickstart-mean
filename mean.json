@@ -1,7 +1,7 @@
 {
   "variables": {
     "debian_version": "8.3.0",
-    "atlas_box_version": "0.0.13",
+    "atlas_box_version": "0.0.14",
     "atkas_token": "{{ env `ATLAS_TOKEN` }}",
     "docker_login_email": "{{ env `DOCKER_LOGIN_EMAIL` }}",
     "docker_login_password": "{{ env `DOCKER_LOGIN_PASSWORD` }}",
